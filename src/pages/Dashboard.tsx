@@ -9,6 +9,7 @@ import { StatusFilter } from "@/components/dashboard/StatusFilter";
 import { TerritoryMetricsChart } from "@/components/dashboard/TerritoryMetricsChart";
 import { StatusDistributionChart } from "@/components/dashboard/StatusDistributionChart";
 import { ActionTable } from "@/components/dashboard/ActionTable";
+import { useDashboardData } from "@/hooks/useDashboardData";
 import {
   BarChart3,
   CheckCircle2,
@@ -16,82 +17,14 @@ import {
   FileText,
   Filter,
   X,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
-import { DashboardFilters, Acao, Territorio, MetricasTerritoriais } from "@/types/dashboard";
-
-// Mock data - replace with real API calls
-const mockTerritorios: Territorio[] = [
-  { id: "1", nome: "Norte" },
-  { id: "2", nome: "Sul" },
-  { id: "3", nome: "Leste" },
-  { id: "4", nome: "Oeste" },
-  { id: "5", nome: "Centro" },
-];
-
-const mockAcoes: Acao[] = [
-  {
-    id: "1",
-    dataReuniao: "2025-01-15",
-    pauta: "Infraestrutura",
-    problema: "Manutenção de estradas",
-    descricao: "Realizar manutenção preventiva",
-    solucao: "Contratar equipe especializada",
-    responsaveis: "João Silva, Maria Santos",
-    territorio: "Norte",
-    prazo: "2025-02-15",
-    status: "Em andamento",
-  },
-  {
-    id: "2",
-    dataReuniao: "2025-01-10",
-    pauta: "Educação",
-    problema: "Falta de materiais escolares",
-    descricao: "Aquisição de materiais",
-    solucao: "Processo licitatório",
-    responsaveis: "Pedro Costa",
-    territorio: "Sul",
-    prazo: "2025-03-01",
-    status: "Pendente",
-  },
-  {
-    id: "3",
-    dataReuniao: "2025-01-20",
-    pauta: "Saúde",
-    problema: "Falta de medicamentos",
-    descricao: "Reabastecer farmácia básica",
-    solucao: "Compra emergencial",
-    responsaveis: "Ana Lima",
-    territorio: "Leste",
-    prazo: "2025-01-25",
-    status: "Concluído",
-  },
-  {
-    id: "4",
-    dataReuniao: "2025-01-18",
-    pauta: "Segurança",
-    problema: "Iluminação pública deficiente",
-    descricao: "Instalação de novos postes",
-    solucao: "Parceria com concessionária",
-    responsaveis: "Carlos Mendes",
-    territorio: "Oeste",
-    prazo: "2025-02-28",
-    status: "Em andamento",
-  },
-  {
-    id: "5",
-    dataReuniao: "2025-01-12",
-    pauta: "Meio Ambiente",
-    problema: "Coleta de lixo irregular",
-    descricao: "Melhorar frequência de coleta",
-    solucao: "Contratar mais caminhões",
-    responsaveis: "Fernanda Oliveira",
-    territorio: "Centro",
-    prazo: "2025-02-10",
-    status: "Pendente",
-  },
-];
+import { DashboardFilters, MetricasTerritoriais } from "@/types/dashboard";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Dashboard = () => {
+  const { territorios, acoes, loading, error } = useDashboardData();
   const [filters, setFilters] = useState<DashboardFilters>({
     territorios: [],
     status: [],
@@ -101,7 +34,7 @@ const Dashboard = () => {
 
   // Filter actions based on selected filters
   const filteredAcoes = useMemo(() => {
-    return mockAcoes.filter((acao) => {
+    return acoes.filter((acao) => {
       if (filters.territorios.length > 0 && !filters.territorios.includes(acao.territorio)) {
         return false;
       }
@@ -144,7 +77,7 @@ const Dashboard = () => {
   // Calculate territorial metrics
   const metricasTerritoriais: MetricasTerritoriais[] = useMemo(() => {
     const territoriosAtivos =
-      filters.territorios.length > 0 ? filters.territorios : mockTerritorios.map((t) => t.nome);
+      filters.territorios.length > 0 ? filters.territorios : territorios.map((t) => t.nome);
 
     return territoriosAtivos.map((territorio) => {
       const acoesDoTerritorio = filteredAcoes.filter((a) => a.territorio === territorio);
@@ -163,7 +96,7 @@ const Dashboard = () => {
         percentualConclusao,
       };
     });
-  }, [filteredAcoes, filters.territorios]);
+  }, [filteredAcoes, filters.territorios, territorios]);
 
   // Calculate status distribution
   const statusDistribution = useMemo(() => {
@@ -188,6 +121,30 @@ const Dashboard = () => {
     filters.dataFim ||
     filters.responsavel ||
     filters.pauta;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-12 h-12 animate-spin mx-auto text-primary" />
+          <p className="text-muted-foreground">Carregando dados...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Alert variant="destructive" className="max-w-md">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Erro ao carregar dados: {error}
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -240,7 +197,7 @@ const Dashboard = () => {
 
                 <div className="space-y-6">
                   <TerritoryFilter
-                    territorios={mockTerritorios}
+                    territorios={territorios}
                     selectedTerritorios={filters.territorios}
                     onTerritoriosChange={(territorios) =>
                       setFilters({ ...filters, territorios })
