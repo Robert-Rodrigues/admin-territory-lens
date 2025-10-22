@@ -8,7 +8,7 @@ export interface Responsavel {
   nome: string;
 }
 
-export interface Acao {
+export interface Apontamento {
   id: string;
   dataReuniao: string;
   pauta: string;

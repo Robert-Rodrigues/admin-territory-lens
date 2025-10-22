@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Acao, Territorio } from '@/types/dashboard';
+import { Apontamento, Territorio } from '@/types/dashboard';
 
 export const useDashboardData = () => {
   const [territorios, setTerritorios] = useState<Territorio[]>([]);
-  const [acoes, setAcoes] = useState<Acao[]>([]);
+  const [apontamentos, setApontamentos] = useState<Apontamento[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,8 +60,8 @@ export const useDashboardData = () => {
 
       if (reunioesError) throw reunioesError;
 
-      // Transform data to Acao format
-      const acoesFormatted: Acao[] = [];
+      // Transform data to Apontamento format
+      const apontamentosFormatted: Apontamento[] = [];
       
       (reunioesData || []).forEach((reuniao: any) => {
         const territorioNome = reuniao.territorios?.nome || 'Sem território';
@@ -75,7 +75,7 @@ export const useDashboardData = () => {
               .filter(Boolean)
               .join(', ');
 
-            acoesFormatted.push({
+            apontamentosFormatted.push({
               id: acao.id_acao.toString(),
               dataReuniao: dataReuniao,
               pauta: pauta.descricao || 'Sem pauta',
@@ -91,7 +91,7 @@ export const useDashboardData = () => {
         });
       });
 
-      setAcoes(acoesFormatted);
+      setApontamentos(apontamentosFormatted);
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
       setError(err instanceof Error ? err.message : 'Erro ao carregar dados');
@@ -109,7 +109,7 @@ export const useDashboardData = () => {
 
   return {
     territorios,
-    acoes,
+    apontamentos,
     loading,
     error,
     refetch: fetchDashboardData,

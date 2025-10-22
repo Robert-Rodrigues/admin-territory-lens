@@ -12,6 +12,8 @@ interface MetricCardProps {
   };
   variant?: "default" | "success" | "warning" | "danger" | "info";
   className?: string;
+  onClick?: () => void;
+  isActive?: boolean;
 }
 
 const variantStyles = {
@@ -45,19 +47,24 @@ export const MetricCard = ({
   trend,
   variant = "default",
   className,
+  onClick,
+  isActive = false,
 }: MetricCardProps) => {
   return (
     <Card
+      onClick={onClick}
       className={cn(
-        "relative overflow-hidden border-2 p-6 transition-smooth hover:shadow-lg hover:-translate-y-1",
+        "relative overflow-hidden border-2 p-4 sm:p-6 transition-smooth hover:shadow-lg hover:-translate-y-1",
         variantStyles[variant],
+        onClick && "cursor-pointer active:scale-95",
+        isActive && "ring-2 ring-primary shadow-lg",
         className
       )}
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-sm font-medium text-muted-foreground mb-2">{title}</p>
-          <p className={cn("text-3xl font-bold tracking-tight", valueVariantStyles[variant])}>
+          <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 sm:mb-2">{title}</p>
+          <p className={cn("text-2xl sm:text-3xl font-bold tracking-tight", valueVariantStyles[variant])}>
             {value}
           </p>
           {trend && (
@@ -73,11 +80,11 @@ export const MetricCard = ({
         </div>
         <div
           className={cn(
-            "p-3 rounded-xl transition-smooth",
+            "p-2 sm:p-3 rounded-xl transition-smooth",
             iconVariantStyles[variant]
           )}
         >
-          <Icon className="w-6 h-6" />
+          <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
         </div>
       </div>
     </Card>

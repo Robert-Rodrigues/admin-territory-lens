@@ -8,7 +8,7 @@ import { TerritoryFilter } from "@/components/dashboard/TerritoryFilter";
 import { StatusFilter } from "@/components/dashboard/StatusFilter";
 import { TerritoryMetricsChart } from "@/components/dashboard/TerritoryMetricsChart";
 import { StatusDistributionChart } from "@/components/dashboard/StatusDistributionChart";
-import { ActionTable } from "@/components/dashboard/ActionTable";
+import { ApontamentoTable } from "@/components/dashboard/ApontamentoTable";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import {
   BarChart3,
@@ -24,55 +24,66 @@ import { DashboardFilters, MetricasTerritoriais } from "@/types/dashboard";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Dashboard = () => {
-  const { territorios, acoes, loading, error } = useDashboardData();
+  const { territorios, apontamentos, loading, error } = useDashboardData();
   const [filters, setFilters] = useState<DashboardFilters>({
     territorios: [],
     status: [],
   });
 
   const [showFilters, setShowFilters] = useState(true);
+  const [activeMetric, setActiveMetric] = useState<string | null>(null);
 
-  // Filter actions based on selected filters
-  const filteredAcoes = useMemo(() => {
-    return acoes.filter((acao) => {
-      if (filters.territorios.length > 0 && !filters.territorios.includes(acao.territorio)) {
+  // Filter apontamentos based on selected filters and active metric
+  const filteredApontamentos = useMemo(() => {
+    return apontamentos.filter((apontamento) => {
+      if (filters.territorios.length > 0 && !filters.territorios.includes(apontamento.territorio)) {
         return false;
       }
-      if (filters.status.length > 0 && !filters.status.includes(acao.status)) {
+      if (filters.status.length > 0 && !filters.status.includes(apontamento.status)) {
         return false;
       }
-      if (filters.dataInicio && new Date(acao.dataReuniao) < new Date(filters.dataInicio)) {
+      // Active metric filter
+      if (activeMetric === 'pendentes' && apontamento.status !== 'Pendente') {
         return false;
       }
-      if (filters.dataFim && new Date(acao.dataReuniao) > new Date(filters.dataFim)) {
+      if (activeMetric === 'emAndamento' && apontamento.status !== 'Em andamento') {
+        return false;
+      }
+      if (activeMetric === 'concluidos' && apontamento.status !== 'Concluído') {
+        return false;
+      }
+      if (filters.dataInicio && new Date(apontamento.dataReuniao) < new Date(filters.dataInicio)) {
+        return false;
+      }
+      if (filters.dataFim && new Date(apontamento.dataReuniao) > new Date(filters.dataFim)) {
         return false;
       }
       if (
         filters.responsavel &&
-        !acao.responsaveis.toLowerCase().includes(filters.responsavel.toLowerCase())
+        !apontamento.responsaveis.toLowerCase().includes(filters.responsavel.toLowerCase())
       ) {
         return false;
       }
       if (
         filters.pauta &&
-        !acao.pauta.toLowerCase().includes(filters.pauta.toLowerCase()) &&
-        !acao.problema.toLowerCase().includes(filters.pauta.toLowerCase())
+        !apontamento.pauta.toLowerCase().includes(filters.pauta.toLowerCase()) &&
+        !apontamento.problema.toLowerCase().includes(filters.pauta.toLowerCase())
       ) {
         return false;
       }
       return true;
     });
-  }, [filters]);
+  }, [filters, activeMetric, apontamentos]);
 
   // Calculate metrics
   const metrics = useMemo(() => {
-    const total = filteredAcoes.length;
-    const pendentes = filteredAcoes.filter((a) => a.status === "Pendente").length;
-    const emAndamento = filteredAcoes.filter((a) => a.status === "Em andamento").length;
-    const concluidos = filteredAcoes.filter((a) => a.status === "Concluído").length;
+    const total = filteredApontamentos.length;
+    const pendentes = filteredApontamentos.filter((a) => a.status === "Pendente").length;
+    const emAndamento = filteredApontamentos.filter((a) => a.status === "Em andamento").length;
+    const concluidos = filteredApontamentos.filter((a) => a.status === "Concluído").length;
 
     return { total, pendentes, emAndamento, concluidos };
-  }, [filteredAcoes]);
+  }, [filteredApontamentos]);
 
   // Calculate territorial metrics
   const metricasTerritoriais: MetricasTerritoriais[] = useMemo(() => {
@@ -80,11 +91,11 @@ const Dashboard = () => {
       filters.territorios.length > 0 ? filters.territorios : territorios.map((t) => t.nome);
 
     return territoriosAtivos.map((territorio) => {
-      const acoesDoTerritorio = filteredAcoes.filter((a) => a.territorio === territorio);
-      const total = acoesDoTerritorio.length;
-      const pendentes = acoesDoTerritorio.filter((a) => a.status === "Pendente").length;
-      const emAndamento = acoesDoTerritorio.filter((a) => a.status === "Em andamento").length;
-      const concluidos = acoesDoTerritorio.filter((a) => a.status === "Concluído").length;
+      const apontamentosDoTerritorio = filteredApontamentos.filter((a) => a.territorio === territorio);
+      const total = apontamentosDoTerritorio.length;
+      const pendentes = apontamentosDoTerritorio.filter((a) => a.status === "Pendente").length;
+      const emAndamento = apontamentosDoTerritorio.filter((a) => a.status === "Em andamento").length;
+      const concluidos = apontamentosDoTerritorio.filter((a) => a.status === "Concluído").length;
       const percentualConclusao = total > 0 ? (concluidos / total) * 100 : 0;
 
       return {
@@ -96,7 +107,7 @@ const Dashboard = () => {
         percentualConclusao,
       };
     });
-  }, [filteredAcoes, filters.territorios, territorios]);
+  }, [filteredApontamentos, filters.territorios, territorios]);
 
   // Calculate status distribution
   const statusDistribution = useMemo(() => {
@@ -112,6 +123,11 @@ const Dashboard = () => {
       territorios: [],
       status: [],
     });
+    setActiveMetric(null);
+  };
+
+  const handleMetricClick = (metric: string) => {
+    setActiveMetric(activeMetric === metric ? null : metric);
   };
 
   const hasActiveFilters =
@@ -153,8 +169,8 @@ const Dashboard = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Painel de Gestão</h1>
-              <p className="text-sm text-muted-foreground mt-1">
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground">Painel de Gestão</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                 Visualização de métricas territoriais
               </p>
             </div>
@@ -171,12 +187,12 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
           {/* Sidebar - Filters */}
           {showFilters && (
             <aside className="lg:col-span-1">
-              <Card className="p-6 sticky top-24">
+              <Card className="p-4 sm:p-6 sticky top-24">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold flex items-center gap-2">
                     <Filter className="w-5 h-5" />
@@ -271,48 +287,57 @@ const Dashboard = () => {
           <main className={showFilters ? "lg:col-span-3" : "lg:col-span-4"}>
             <div className="space-y-6">
               {/* KPI Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 <MetricCard
-                  title="Total de Ações"
+                  title="Total de Apontamentos"
                   value={metrics.total}
                   icon={FileText}
                   variant="default"
+                  onClick={() => handleMetricClick('total')}
+                  isActive={activeMetric === 'total'}
                 />
                 <MetricCard
                   title="Pendentes"
                   value={metrics.pendentes}
                   icon={Clock}
                   variant="danger"
+                  onClick={() => handleMetricClick('pendentes')}
+                  isActive={activeMetric === 'pendentes'}
                 />
                 <MetricCard
                   title="Em Andamento"
                   value={metrics.emAndamento}
                   icon={BarChart3}
                   variant="warning"
+                  onClick={() => handleMetricClick('emAndamento')}
+                  isActive={activeMetric === 'emAndamento'}
                 />
                 <MetricCard
                   title="Concluídos"
                   value={metrics.concluidos}
                   icon={CheckCircle2}
                   variant="success"
+                  onClick={() => handleMetricClick('concluidos')}
+                  isActive={activeMetric === 'concluidos'}
                 />
               </div>
 
               {/* Charts */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 <StatusDistributionChart data={statusDistribution} />
                 <TerritoryMetricsChart data={metricasTerritoriais} />
               </div>
 
               {/* Table */}
               <div>
-                <div className="mb-4">
-                  <h2 className="text-xl font-semibold">Ações Detalhadas</h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {filteredAcoes.length} resultado(s) encontrado(s)
+                <div className="mb-3 sm:mb-4">
+                  <h2 className="text-lg sm:text-xl font-semibold">Apontamentos Detalhados</h2>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                    {filteredApontamentos.length} resultado(s) encontrado(s)
+                    {activeMetric && <span className="ml-2 text-primary font-medium">(Filtrado)</span>}
                   </p>
                 </div>
-                <ActionTable actions={filteredAcoes} />
+                <ApontamentoTable apontamentos={filteredApontamentos} />
               </div>
             </div>
           </main>
