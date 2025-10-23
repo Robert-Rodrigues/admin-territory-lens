@@ -60,8 +60,8 @@ export const useDashboardData = () => {
 
       if (reunioesError) throw reunioesError;
 
-      // Transform data to Apontamento format
-      const apontamentosFormatted: Apontamento[] = [];
+      // Transform data to Apontamento format with deduplication
+      const apontamentosMap = new Map<string, Apontamento>();
       
       (reunioesData || []).forEach((reuniao: any) => {
         const territorioNome = reuniao.territorios?.nome || 'Sem território';
@@ -69,14 +69,16 @@ export const useDashboardData = () => {
 
         (reuniao.pautas || []).forEach((pauta: any) => {
           (pauta.acoes || []).forEach((acao: any) => {
+            const acaoId = acao.id_acao.toString();
+            
             // Get all responsaveis names
             const responsaveisNomes = (acao.acao_responsavel || [])
               .map((ar: any) => ar.responsaveis?.nome)
               .filter(Boolean)
               .join(', ');
 
-            apontamentosFormatted.push({
-              id: acao.id_acao.toString(),
+            const apontamento: Apontamento = {
+              id: acaoId,
               dataReuniao: dataReuniao,
               pauta: pauta.descricao || 'Sem pauta',
               problema: acao.problema || '',
@@ -86,12 +88,17 @@ export const useDashboardData = () => {
               territorio: territorioNome,
               prazo: acao.prazo || '',
               status: normalizeStatus(acao.status),
-            });
+            };
+
+            // Keep only the most recent (reunioes are ordered by date desc)
+            if (!apontamentosMap.has(acaoId)) {
+              apontamentosMap.set(acaoId, apontamento);
+            }
           });
         });
       });
 
-      setApontamentos(apontamentosFormatted);
+      setApontamentos(Array.from(apontamentosMap.values()));
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
       setError(err instanceof Error ? err.message : 'Erro ao carregar dados');

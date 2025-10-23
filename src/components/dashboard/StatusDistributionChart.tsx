@@ -38,9 +38,9 @@ const CustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: an
 
 export const StatusDistributionChart = ({ data }: StatusDistributionChartProps) => {
   return (
-    <Card className="p-6">
-      <h3 className="text-lg font-semibold mb-4">Distribuição por Status</h3>
-      <ResponsiveContainer width="100%" height={300}>
+    <Card className="p-4 sm:p-6">
+      <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Distribuição por Status</h3>
+      <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
         <PieChart>
           <Pie
             data={data}
@@ -48,7 +48,8 @@ export const StatusDistributionChart = ({ data }: StatusDistributionChartProps) 
             nameKey="status"
             cx="50%"
             cy="50%"
-            outerRadius={100}
+            outerRadius={80}
+            className="sm:outerRadius-[100]"
             label={CustomLabel}
             labelLine={false}
           >
@@ -64,9 +65,13 @@ export const StatusDistributionChart = ({ data }: StatusDistributionChartProps) 
               backgroundColor: "hsl(var(--card))",
               border: "1px solid hsl(var(--border))",
               borderRadius: "var(--radius)",
+              fontSize: "0.875rem",
             }}
           />
-          <Legend />
+          <Legend 
+            wrapperStyle={{ fontSize: "0.75rem" }}
+            className="sm:text-sm"
+          />
         </PieChart>
       </ResponsiveContainer>
     </Card>

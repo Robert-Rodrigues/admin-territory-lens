@@ -24,47 +24,60 @@ const COLORS = {
 
 export const TerritoryMetricsChart = ({ data }: TerritoryMetricsChartProps) => {
   return (
-    <Card className="p-6">
-      <h3 className="text-lg font-semibold mb-4">Métricas por Território</h3>
-      <ResponsiveContainer width="100%" height={400}>
-        <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+    <Card className="p-4 sm:p-6">
+      <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Métricas por Território</h3>
+      <ResponsiveContainer width="100%" height={300} className="sm:h-[400px]">
+        <BarChart 
+          data={data} 
+          margin={{ top: 10, right: 10, left: 0, bottom: 80 }}
+          className="sm:margin-[{top:20,right:30,left:20,bottom:60}]"
+        >
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
           <XAxis
             dataKey="territorio"
             angle={-45}
             textAnchor="end"
             height={100}
-            tick={{ fill: "hsl(var(--foreground))", fontSize: 12 }}
+            tick={{ fill: "hsl(var(--foreground))", fontSize: 10 }}
+            className="sm:text-xs"
           />
-          <YAxis tick={{ fill: "hsl(var(--foreground))" }} />
+          <YAxis 
+            tick={{ fill: "hsl(var(--foreground))", fontSize: 10 }} 
+            className="sm:text-xs"
+          />
           <Tooltip
             contentStyle={{
               backgroundColor: "hsl(var(--card))",
               border: "1px solid hsl(var(--border))",
               borderRadius: "var(--radius)",
+              fontSize: "0.75rem",
             }}
           />
           <Legend
-            wrapperStyle={{ paddingTop: "20px" }}
+            wrapperStyle={{ paddingTop: "10px", fontSize: "0.75rem" }}
             iconType="circle"
+            className="sm:text-sm"
           />
           <Bar
             dataKey="pendentes"
             name="Pendentes"
             fill={COLORS.pendentes}
-            radius={[8, 8, 0, 0]}
+            radius={[4, 4, 0, 0]}
+            className="sm:radius-[8,8,0,0]"
           />
           <Bar
             dataKey="emAndamento"
             name="Em Andamento"
             fill={COLORS.emAndamento}
-            radius={[8, 8, 0, 0]}
+            radius={[4, 4, 0, 0]}
+            className="sm:radius-[8,8,0,0]"
           />
           <Bar
             dataKey="concluidos"
             name="Concluídos"
             fill={COLORS.concluidos}
-            radius={[8, 8, 0, 0]}
+            radius={[4, 4, 0, 0]}
+            className="sm:radius-[8,8,0,0]"
           />
         </BarChart>
       </ResponsiveContainer>
