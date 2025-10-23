@@ -50,14 +50,21 @@ export const MetricCard = ({
   onClick,
   isActive = false,
 }: MetricCardProps) => {
+  const activeStyles = {
+    default: "from-primary/30 to-primary/40 shadow-xl border-primary",
+    success: "from-success/30 to-success/40 shadow-xl border-success",
+    warning: "from-warning/30 to-warning/40 shadow-xl border-warning",
+    danger: "from-danger/30 to-danger/40 shadow-xl border-danger",
+    info: "from-info/30 to-info/40 shadow-xl border-info",
+  };
+
   return (
     <Card
       onClick={onClick}
       className={cn(
         "relative overflow-hidden border-2 p-4 sm:p-6 transition-smooth",
-        variantStyles[variant],
+        isActive ? `bg-gradient-to-br ${activeStyles[variant]}` : variantStyles[variant],
         onClick && "cursor-pointer hover:shadow-lg hover:-translate-y-1 active:scale-95",
-        isActive && "ring-4 ring-primary shadow-xl scale-105 border-primary",
         className
       )}
     >
