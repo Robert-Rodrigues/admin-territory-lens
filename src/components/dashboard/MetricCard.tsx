@@ -54,10 +54,10 @@ export const MetricCard = ({
     <Card
       onClick={onClick}
       className={cn(
-        "relative overflow-hidden border-2 p-4 sm:p-6 transition-smooth hover:shadow-lg hover:-translate-y-1",
+        "relative overflow-hidden border-2 p-4 sm:p-6 transition-smooth",
         variantStyles[variant],
-        onClick && "cursor-pointer active:scale-95",
-        isActive && "ring-2 ring-primary shadow-lg",
+        onClick && "cursor-pointer hover:shadow-lg hover:-translate-y-1 active:scale-95",
+        isActive && "ring-4 ring-primary shadow-xl scale-105 border-primary",
         className
       )}
     >
