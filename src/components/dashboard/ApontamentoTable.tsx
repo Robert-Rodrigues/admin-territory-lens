@@ -9,10 +9,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Apontamento } from "@/types/dashboard";
-import { CheckCircle2, Circle, Clock, Calendar, MapPin, Users, FileText, AlertCircle } from "lucide-react";
+import { CheckCircle2, Circle, Clock, Calendar, MapPin, Users, FileText, AlertCircle, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 interface ApontamentoTableProps {
   apontamentos: Apontamento[];
@@ -52,6 +53,8 @@ const getStatusVariant = (status: string) => {
 };
 
 export const ApontamentoTable = ({ apontamentos }: ApontamentoTableProps) => {
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+
   if (apontamentos.length === 0) {
     return (
       <Card className="p-8 text-center">
@@ -69,57 +72,102 @@ export const ApontamentoTable = ({ apontamentos }: ApontamentoTableProps) => {
     <>
       {/* Mobile View - Cards */}
       <div className="lg:hidden space-y-3">
-        {apontamentos.map((apontamento, index) => (
-          <Card key={index} className="overflow-hidden hover:shadow-md transition-smooth border-l-4" style={{
-            borderLeftColor: apontamento.status === 'Concluído' ? 'hsl(var(--success))' : 
-                           apontamento.status === 'Em andamento' ? 'hsl(var(--warning))' : 
-                           'hsl(var(--danger))'
-          }}>
-            {/* Header com Status Badge */}
-            <div className={cn("px-4 py-2", getStatusColor(apontamento.status).replace('bg-', 'bg-').replace('/10', '/5'))}>
-              <div className="flex items-center justify-between">
+        {apontamentos.map((apontamento, index) => {
+          const isExpanded = expandedIndex === index;
+          return (
+            <Card 
+              key={index} 
+              onClick={() => setExpandedIndex(isExpanded ? null : index)}
+              className={cn(
+                "overflow-hidden cursor-pointer transition-all duration-300 border-l-4 active:scale-[0.98]",
+                isExpanded ? "shadow-lg ring-2 ring-primary/20" : "hover:shadow-md hover:-translate-y-0.5"
+              )} 
+              style={{
+                borderLeftColor: apontamento.status === 'Concluído' ? 'hsl(var(--success))' : 
+                               apontamento.status === 'Em andamento' ? 'hsl(var(--warning))' : 
+                               'hsl(var(--danger))'
+              }}
+            >
+              {/* Header com Status Badge */}
+              <div className={cn(
+                "px-4 py-3 flex items-center justify-between transition-colors",
+                getStatusColor(apontamento.status).replace('/10', isExpanded ? '/15' : '/8')
+              )}>
                 <div className="flex items-center gap-2">
-                  {getStatusIcon(apontamento.status)}
+                  <div className={cn("transition-transform", isExpanded && "scale-110")}>
+                    {getStatusIcon(apontamento.status)}
+                  </div>
                   <span className="text-sm font-semibold">{apontamento.status}</span>
                 </div>
-                <Badge variant="outline" className="text-xs font-normal border-current">
-                  {apontamento.territorio}
-                </Badge>
-              </div>
-            </div>
-
-            {/* Conteúdo */}
-            <div className="p-4 space-y-3">
-              {/* Pauta - Destaque principal */}
-              <div>
-                <h3 className="font-semibold text-base leading-tight mb-1">{apontamento.pauta}</h3>
-                <p className="text-sm text-muted-foreground line-clamp-2">{apontamento.problema}</p>
-              </div>
-
-              {/* Informações em grid */}
-              <div className="grid grid-cols-2 gap-3 pt-2 border-t text-xs">
-                <div className="flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-primary shrink-0" />
-                  <span className="text-muted-foreground truncate">
-                    {format(new Date(apontamento.dataReuniao), "dd MMM", { locale: ptBR })}
-                  </span>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-xs font-medium border-current">
+                    {apontamento.territorio}
+                  </Badge>
+                  <ChevronRight className={cn(
+                    "w-4 h-4 text-muted-foreground transition-transform duration-300",
+                    isExpanded && "rotate-90"
+                  )} />
                 </div>
-                {apontamento.prazo && (
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                    <span className="text-muted-foreground truncate">
-                      {format(new Date(apontamento.prazo), "dd MMM", { locale: ptBR })}
-                    </span>
+              </div>
+
+              {/* Conteúdo */}
+              <div className="p-4 space-y-3">
+                {/* Pauta - Destaque principal */}
+                <div>
+                  <h3 className="font-semibold text-base leading-tight mb-2">{apontamento.pauta}</h3>
+                  <div className={cn(
+                    "text-sm text-muted-foreground transition-all duration-300",
+                    isExpanded ? "line-clamp-none" : "line-clamp-2"
+                  )}>
+                    {apontamento.problema}
                   </div>
-                )}
-                <div className="flex items-center gap-1.5 col-span-2">
-                  <Users className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                  <span className="text-muted-foreground truncate">{apontamento.responsaveis}</span>
+                </div>
+
+                {/* Informações em grid */}
+                <div className={cn(
+                  "grid gap-3 pt-3 border-t text-xs transition-all duration-300",
+                  isExpanded ? "grid-cols-1" : "grid-cols-2"
+                )}>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <Calendar className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] text-muted-foreground uppercase font-medium">Data Reunião</span>
+                      <span className="font-medium">
+                        {format(new Date(apontamento.dataReuniao), "dd 'de' MMMM", { locale: ptBR })}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {apontamento.prazo && (
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-warning/10 flex items-center justify-center shrink-0">
+                        <Clock className="w-4 h-4 text-warning" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-muted-foreground uppercase font-medium">Prazo</span>
+                        <span className="font-medium">
+                          {format(new Date(apontamento.prazo), "dd 'de' MMMM", { locale: ptBR })}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className={cn("flex items-center gap-2", !apontamento.prazo && "col-span-2")}>
+                    <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+                      <Users className="w-4 h-4 text-accent" />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[10px] text-muted-foreground uppercase font-medium">Responsáveis</span>
+                      <span className="font-medium truncate">{apontamento.responsaveis}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          );
+        })}
       </div>
 
       {/* Desktop View - Table */}
