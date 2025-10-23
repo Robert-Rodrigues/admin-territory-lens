@@ -70,59 +70,52 @@ export const ApontamentoTable = ({ apontamentos }: ApontamentoTableProps) => {
       {/* Mobile View - Cards */}
       <div className="lg:hidden space-y-3">
         {apontamentos.map((apontamento, index) => (
-          <Card key={index} className="p-4 hover:shadow-md transition-smooth">
-            <div className="space-y-3">
-              {/* Header com Status e Data */}
-              <div className="flex items-start justify-between gap-2">
-                <Badge 
-                  className={cn("gap-1.5 font-medium", getStatusColor(apontamento.status))}
-                >
+          <Card key={index} className="overflow-hidden hover:shadow-md transition-smooth border-l-4" style={{
+            borderLeftColor: apontamento.status === 'Concluído' ? 'hsl(var(--success))' : 
+                           apontamento.status === 'Em andamento' ? 'hsl(var(--warning))' : 
+                           'hsl(var(--danger))'
+          }}>
+            {/* Header com Status Badge */}
+            <div className={cn("px-4 py-2", getStatusColor(apontamento.status).replace('bg-', 'bg-').replace('/10', '/5'))}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
                   {getStatusIcon(apontamento.status)}
-                  {apontamento.status}
-                </Badge>
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Calendar className="w-3.5 h-3.5" />
-                  {format(new Date(apontamento.dataReuniao), "dd/MM/yyyy", { locale: ptBR })}
+                  <span className="text-sm font-semibold">{apontamento.status}</span>
                 </div>
-              </div>
-
-              {/* Território */}
-              <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-primary" />
-                <Badge variant="outline" className="font-normal">
+                <Badge variant="outline" className="text-xs font-normal border-current">
                   {apontamento.territorio}
                 </Badge>
               </div>
+            </div>
 
-              {/* Pauta */}
-              <div className="space-y-1">
-                <p className="text-xs font-medium text-muted-foreground">Pauta</p>
-                <p className="text-sm font-medium">{apontamento.pauta}</p>
+            {/* Conteúdo */}
+            <div className="p-4 space-y-3">
+              {/* Pauta - Destaque principal */}
+              <div>
+                <h3 className="font-semibold text-base leading-tight mb-1">{apontamento.pauta}</h3>
+                <p className="text-sm text-muted-foreground line-clamp-2">{apontamento.problema}</p>
               </div>
 
-              {/* Problema */}
-              <div className="space-y-1">
+              {/* Informações em grid */}
+              <div className="grid grid-cols-2 gap-3 pt-2 border-t text-xs">
                 <div className="flex items-center gap-1.5">
-                  <AlertCircle className="w-3.5 h-3.5 text-muted-foreground" />
-                  <p className="text-xs font-medium text-muted-foreground">Problema</p>
-                </div>
-                <p className="text-sm text-foreground">{apontamento.problema}</p>
-              </div>
-
-              {/* Footer com Responsáveis e Prazo */}
-              <div className="pt-2 border-t flex items-center justify-between gap-4 flex-wrap">
-                <div className="flex items-center gap-1.5 text-xs">
-                  <Users className="w-3.5 h-3.5 text-muted-foreground" />
-                  <span className="text-muted-foreground">{apontamento.responsaveis}</span>
+                  <Calendar className="w-3.5 h-3.5 text-primary shrink-0" />
+                  <span className="text-muted-foreground truncate">
+                    {format(new Date(apontamento.dataReuniao), "dd MMM", { locale: ptBR })}
+                  </span>
                 </div>
                 {apontamento.prazo && (
-                  <div className="flex items-center gap-1.5 text-xs">
-                    <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-                    <span className="text-muted-foreground">
-                      {format(new Date(apontamento.prazo), "dd/MM/yyyy", { locale: ptBR })}
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                    <span className="text-muted-foreground truncate">
+                      {format(new Date(apontamento.prazo), "dd MMM", { locale: ptBR })}
                     </span>
                   </div>
                 )}
+                <div className="flex items-center gap-1.5 col-span-2">
+                  <Users className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                  <span className="text-muted-foreground truncate">{apontamento.responsaveis}</span>
+                </div>
               </div>
             </div>
           </Card>
