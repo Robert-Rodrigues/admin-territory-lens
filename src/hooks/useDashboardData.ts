@@ -61,7 +61,8 @@ export const useDashboardData = () => {
       if (reunioesError) throw reunioesError;
 
       // Transform data to Apontamento format with deduplication
-      const apontamentosMap = new Map<string, Apontamento>();
+      // Using Map to keep only the most recent version of each acao
+      const apontamentosMap = new Map<string, { apontamento: Apontamento; dataReuniao: string }>();
       
       (reunioesData || []).forEach((reuniao: any) => {
         const territorioNome = reuniao.territorios?.nome || 'Sem território';
@@ -90,15 +91,16 @@ export const useDashboardData = () => {
               status: normalizeStatus(acao.status),
             };
 
-            // Keep only the most recent (reunioes are ordered by date desc)
-            if (!apontamentosMap.has(acaoId)) {
-              apontamentosMap.set(acaoId, apontamento);
+            // Keep only the most recent version (compare dates if already exists)
+            const existing = apontamentosMap.get(acaoId);
+            if (!existing || new Date(dataReuniao) > new Date(existing.dataReuniao)) {
+              apontamentosMap.set(acaoId, { apontamento, dataReuniao });
             }
           });
         });
       });
 
-      setApontamentos(Array.from(apontamentosMap.values()));
+      setApontamentos(Array.from(apontamentosMap.values()).map(item => item.apontamento));
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
       setError(err instanceof Error ? err.message : 'Erro ao carregar dados');
