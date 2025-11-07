@@ -61,7 +61,7 @@ export const useDashboardData = () => {
       if (reunioesError) throw reunioesError;
 
       // Transform data to Apontamento format with deduplication
-      // Using Map to keep only the most recent version of each acao
+      // Using Map to keep only the most recent version based on problema content
       const apontamentosMap = new Map<string, { apontamento: Apontamento; dataReuniao: string }>();
       
       (reunioesData || []).forEach((reuniao: any) => {
@@ -78,12 +78,19 @@ export const useDashboardData = () => {
               .filter(Boolean)
               .join(', ');
 
+            const problema = acao.problema || '';
+            const descricao = acao.descricao_acao || '';
+            
+            // Use problema + territorio as unique key to identify same apontamento across meetings
+            // This ensures we only keep the most recent status of each unique problem
+            const uniqueKey = `${territorioNome}|${problema}|${descricao}`.toLowerCase().trim();
+
             const apontamento: Apontamento = {
               id: acaoId,
               dataReuniao: dataReuniao,
               pauta: pauta.descricao || 'Sem pauta',
-              problema: acao.problema || '',
-              descricao: acao.descricao_acao || '',
+              problema: problema,
+              descricao: descricao,
               solucao: '', // Not in current schema
               responsaveis: responsaveisNomes || 'Sem responsável',
               territorio: territorioNome,
@@ -92,9 +99,9 @@ export const useDashboardData = () => {
             };
 
             // Keep only the most recent version (compare dates if already exists)
-            const existing = apontamentosMap.get(acaoId);
+            const existing = apontamentosMap.get(uniqueKey);
             if (!existing || new Date(dataReuniao) > new Date(existing.dataReuniao)) {
-              apontamentosMap.set(acaoId, { apontamento, dataReuniao });
+              apontamentosMap.set(uniqueKey, { apontamento, dataReuniao });
             }
           });
         });
