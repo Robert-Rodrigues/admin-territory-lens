@@ -1,7 +1,9 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Calendar, FileText, ListChecks } from "lucide-react";
+import { LayoutDashboard, Calendar, FileText, ListChecks, Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -12,64 +14,109 @@ const navigationItems = [
     label: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
+    description: "Visão geral das métricas",
   },
   {
     label: "Reuniões",
     href: "/reunioes",
     icon: Calendar,
+    description: "Gestão de reuniões",
   },
   {
     label: "Pautas",
     href: "/pautas",
     icon: FileText,
+    description: "Tópicos discutidos",
   },
   {
     label: "Apontamentos",
     href: "/apontamentos",
     icon: ListChecks,
+    description: "Ações e follow-ups",
   },
 ];
+
+const SidebarContent = () => {
+  const location = useLocation();
+
+  return (
+    <>
+      <div className="p-6 border-b border-sidebar-border bg-sidebar">
+        <h1 className="text-xl font-bold text-sidebar-foreground">
+          Gestão Territorial
+        </h1>
+        <p className="text-xs text-sidebar-foreground/70 mt-1">
+          Sistema de gerenciamento
+        </p>
+      </div>
+      <nav className="flex-1 p-4 bg-sidebar">
+        <div className="space-y-1">
+          {navigationItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                to={item.href}
+                className={cn(
+                  "flex items-start gap-3 px-4 py-3 rounded-lg transition-smooth group",
+                  isActive
+                    ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-glow"
+                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                )}
+              >
+                <Icon className="w-5 h-5 mt-0.5 shrink-0" />
+                <div className="flex flex-col">
+                  <span className="font-medium">{item.label}</span>
+                  <span className={cn(
+                    "text-xs mt-0.5",
+                    isActive 
+                      ? "text-sidebar-primary-foreground/80" 
+                      : "text-sidebar-foreground/60 group-hover:text-sidebar-accent-foreground/80"
+                  )}>
+                    {item.description}
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+    </>
+  );
+};
 
 export const AppLayout = ({ children }: AppLayoutProps) => {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-background flex">
-      {/* Sidebar */}
-      <aside className="hidden md:flex md:w-64 bg-sidebar border-r border-sidebar-border flex-col fixed h-full z-20">
-        <div className="p-6 border-b border-sidebar-border">
-          <h1 className="text-xl font-bold text-sidebar-foreground">
-            Gestão Territorial
-          </h1>
-        </div>
-        <nav className="flex-1 p-4">
-          <ul className="space-y-2">
-            {navigationItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname === item.href;
-              return (
-                <li key={item.href}>
-                  <Link
-                    to={item.href}
-                    className={cn(
-                      "flex items-center gap-3 px-4 py-3 rounded-lg transition-smooth",
-                      isActive
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-glow"
-                        : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                    )}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span className="font-medium">{item.label}</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
+    <div className="min-h-screen bg-background">
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex md:w-72 bg-sidebar border-r border-sidebar-border flex-col fixed h-full z-20">
+        <SidebarContent />
       </aside>
 
+      {/* Mobile Header with Menu */}
+      <header className="md:hidden fixed top-0 left-0 right-0 h-14 bg-card border-b border-border z-30 flex items-center px-4">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" className="mr-2">
+              <Menu className="w-5 h-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="p-0 w-72">
+            <div className="flex flex-col h-full">
+              <SidebarContent />
+            </div>
+          </SheetContent>
+        </Sheet>
+        <h1 className="text-lg font-bold text-foreground">
+          Gestão Territorial
+        </h1>
+      </header>
+
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-sidebar border-t border-sidebar-border z-20">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border z-30 safe-area-bottom">
         <ul className="flex justify-around items-center h-16">
           {navigationItems.map((item) => {
             const Icon = item.icon;
@@ -79,14 +126,14 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
                 <Link
                   to={item.href}
                   className={cn(
-                    "flex flex-col items-center justify-center h-full gap-1 transition-smooth",
+                    "flex flex-col items-center justify-center h-full gap-1 transition-smooth px-2",
                     isActive
-                      ? "text-sidebar-primary"
-                      : "text-sidebar-foreground/70 hover:text-sidebar-foreground"
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  <Icon className="w-5 h-5" />
-                  <span className="text-xs font-medium">{item.label}</span>
+                  <Icon className={cn("w-5 h-5", isActive && "scale-110")} />
+                  <span className="text-[10px] font-medium leading-tight text-center">{item.label}</span>
                 </Link>
               </li>
             );
@@ -95,7 +142,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
       </nav>
 
       {/* Main Content */}
-      <main className="flex-1 md:ml-64 mb-16 md:mb-0">
+      <main className="md:ml-72 pt-14 md:pt-0 pb-16 md:pb-0">
         {children}
       </main>
     </div>

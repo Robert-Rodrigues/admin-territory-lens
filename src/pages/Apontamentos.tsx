@@ -167,16 +167,16 @@ const Apontamentos = () => {
     <AppLayout>
       <div className="min-h-screen bg-background">
         {/* Header */}
-        <header className="border-b bg-card shadow-sm sticky top-0 z-10">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
+        <header className="border-b bg-card shadow-sm sticky top-0 z-10 backdrop-blur-sm bg-card/80">
+          <div className="container mx-auto px-4 py-6">
+            <div className="flex items-center justify-between flex-wrap gap-3">
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">
-                  <ListChecks className="w-6 h-6 text-primary" />
+                <h1 className="text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-2">
+                  <ListChecks className="w-7 h-7 text-primary" />
                   Apontamentos
                 </h1>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                  Ações e follow-ups das pautas • {metrics.total} apontamentos
+                <p className="text-sm text-muted-foreground mt-1.5">
+                  {metrics.total} {metrics.total === 1 ? 'apontamento' : 'apontamentos'}
                 </p>
               </div>
               <Button
@@ -192,7 +192,7 @@ const Apontamentos = () => {
           </div>
         </header>
 
-        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
+        <div className="container mx-auto px-4 py-6">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
             {/* Sidebar - Filters */}
             {showFilters && (

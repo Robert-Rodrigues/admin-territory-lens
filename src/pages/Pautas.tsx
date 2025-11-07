@@ -58,25 +58,25 @@ const Pautas = () => {
     <AppLayout>
       <div className="min-h-screen bg-background">
         {/* Header */}
-        <header className="border-b bg-card shadow-sm sticky top-0 z-10">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
+        <header className="border-b bg-card shadow-sm sticky top-0 z-10 backdrop-blur-sm bg-card/80">
+          <div className="container mx-auto px-4 py-6">
+            <div className="flex items-center justify-between flex-wrap gap-3">
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">
-                  <FileText className="w-6 h-6 text-primary" />
+                <h1 className="text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-2">
+                  <FileText className="w-7 h-7 text-primary" />
                   Pautas
                 </h1>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                  Visualização de todas as pautas • {filteredPautas.length} pautas
+                <p className="text-sm text-muted-foreground mt-1.5">
+                  {filteredPautas.length} {filteredPautas.length === 1 ? 'pauta' : 'pautas'}
                 </p>
               </div>
             </div>
           </div>
         </header>
 
-        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
+        <div className="container mx-auto px-4 py-6 space-y-6">
           {/* Filters */}
-          <Card className="p-4 mb-6">
+          <Card className="p-5 shadow-md">
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -103,6 +103,7 @@ const Pautas = () => {
                       setSearchTerm("");
                       setDateFilter("");
                     }}
+                    className="shrink-0"
                   >
                     <X className="w-4 h-4" />
                   </Button>
