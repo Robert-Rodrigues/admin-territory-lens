@@ -197,7 +197,7 @@ const Apontamentos = () => {
             {/* Sidebar - Filters */}
             {showFilters && (
               <aside className="lg:col-span-1">
-                <Card className="p-4 sm:p-6 sticky top-24">
+                <Card className="p-5 shadow-md sticky top-24">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-semibold flex items-center gap-2">
                       <Filter className="w-5 h-5" />

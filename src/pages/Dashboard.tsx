@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,7 @@ import {
   X,
   Loader2,
   AlertCircle,
+  LayoutDashboard,
 } from "lucide-react";
 import { DashboardFilters, MetricasTerritoriais } from "@/types/dashboard";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -140,59 +142,65 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <Loader2 className="w-12 h-12 animate-spin mx-auto text-primary" />
-          <p className="text-muted-foreground">Carregando dados...</p>
+      <AppLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <Loader2 className="w-12 h-12 animate-spin mx-auto text-primary" />
+            <p className="text-muted-foreground">Carregando dados...</p>
+          </div>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Alert variant="destructive" className="max-w-md">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Erro ao carregar dados: {error}
-          </AlertDescription>
-        </Alert>
-      </div>
+      <AppLayout>
+        <div className="min-h-screen flex items-center justify-center p-4">
+          <Alert variant="destructive" className="max-w-md">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>Erro ao carregar dados: {error}</AlertDescription>
+          </Alert>
+        </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card shadow-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-foreground">Painel de Gestão</h1>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                Visualização de métricas territoriais
-              </p>
+    <AppLayout>
+      <div className="min-h-screen bg-background">
+        {/* Header */}
+        <header className="border-b bg-card shadow-sm sticky top-0 z-10 backdrop-blur-sm bg-card/80">
+          <div className="container mx-auto px-4 py-6">
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-2">
+                  <LayoutDashboard className="w-7 h-7 text-primary" />
+                  Dashboard
+                </h1>
+                <p className="text-sm text-muted-foreground mt-1.5">
+                  {metrics.total} {metrics.total === 1 ? 'apontamento' : 'apontamentos'}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowFilters(!showFilters)}
+                className="gap-2"
+              >
+                <Filter className="w-4 h-4" />
+                {showFilters ? "Ocultar" : "Mostrar"}
+              </Button>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowFilters(!showFilters)}
-              className="gap-2"
-            >
-              <Filter className="w-4 h-4" />
-              {showFilters ? "Ocultar" : "Mostrar"} Filtros
-            </Button>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="container mx-auto px-4 py-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
           {/* Sidebar - Filters */}
           {showFilters && (
             <aside className="lg:col-span-1">
-              <Card className="p-4 sm:p-6 sticky top-24">
+              <Card className="p-5 shadow-md sticky top-24">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold flex items-center gap-2">
                     <Filter className="w-5 h-5" />
@@ -341,9 +349,10 @@ const Dashboard = () => {
               </div>
             </div>
           </main>
+          </div>
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 
