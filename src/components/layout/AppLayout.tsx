@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Calendar, FileText, ListChecks, Menu } from "lucide-react";
+import { Eye, LayoutDashboard, Calendar, FileText, ListChecks, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -11,28 +11,34 @@ interface AppLayoutProps {
 
 const navigationItems = [
   {
+    label: "Visão Geral",
+    href: "/",
+    icon: Eye,
+    description: "Visualização hierárquica",
+  },
+  {
     label: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
-    description: "Visão geral das métricas",
+    description: "Métricas e análises",
   },
   {
     label: "Reuniões",
     href: "/reunioes",
     icon: Calendar,
-    description: "Gestão de reuniões",
+    description: "Histórico de reuniões",
   },
   {
     label: "Pautas",
     href: "/pautas",
     icon: FileText,
-    description: "Tópicos discutidos",
+    description: "Pautas discutidas",
   },
   {
     label: "Apontamentos",
     href: "/apontamentos",
     icon: ListChecks,
-    description: "Ações e follow-ups",
+    description: "Ações e status",
   },
 ];
 
