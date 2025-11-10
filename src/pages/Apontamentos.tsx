@@ -4,25 +4,13 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { MetricCard } from "@/components/dashboard/MetricCard";
+import { useDashboardData } from "@/hooks/useDashboardData";
+import { ApontamentoTable } from "@/components/dashboard/ApontamentoTable";
+import { ApontamentosChart } from "@/components/apontamentos/ApontamentosChart";
 import { TerritoryFilter } from "@/components/dashboard/TerritoryFilter";
 import { StatusFilter } from "@/components/dashboard/StatusFilter";
-import { TerritoryMetricsChart } from "@/components/dashboard/TerritoryMetricsChart";
-import { StatusDistributionChart } from "@/components/dashboard/StatusDistributionChart";
-import { ApontamentoTable } from "@/components/dashboard/ApontamentoTable";
-import { useDashboardData } from "@/hooks/useDashboardData";
-import {
-  BarChart3,
-  CheckCircle2,
-  Clock,
-  FileText,
-  Filter,
-  X,
-  Loader2,
-  AlertCircle,
-  ListChecks,
-} from "lucide-react";
-import { DashboardFilters, MetricasTerritoriais } from "@/types/dashboard";
+import { DashboardFilters } from "@/types/dashboard";
+import { ListChecks, Filter, X, Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Apontamentos = () => {
@@ -33,7 +21,6 @@ const Apontamentos = () => {
   });
 
   const [showFilters, setShowFilters] = useState(true);
-  const [activeMetric, setActiveMetric] = useState<string | null>(null);
 
   const filteredApontamentos = useMemo(() => {
     return apontamentos.filter((apontamento) => {
@@ -41,15 +28,6 @@ const Apontamentos = () => {
         return false;
       }
       if (filters.status.length > 0 && !filters.status.includes(apontamento.status)) {
-        return false;
-      }
-      if (activeMetric === 'pendentes' && apontamento.status !== 'Pendente') {
-        return false;
-      }
-      if (activeMetric === 'emAndamento' && apontamento.status !== 'Em andamento') {
-        return false;
-      }
-      if (activeMetric === 'concluidos' && apontamento.status !== 'Concluído') {
         return false;
       }
       if (filters.dataInicio && new Date(apontamento.dataReuniao) < new Date(filters.dataInicio)) {
@@ -73,58 +51,13 @@ const Apontamentos = () => {
       }
       return true;
     });
-  }, [filters, activeMetric, apontamentos]);
-
-  const metrics = useMemo(() => {
-    const total = filteredApontamentos.length;
-    const pendentes = filteredApontamentos.filter((a) => a.status === "Pendente").length;
-    const emAndamento = filteredApontamentos.filter((a) => a.status === "Em andamento").length;
-    const concluidos = filteredApontamentos.filter((a) => a.status === "Concluído").length;
-
-    return { total, pendentes, emAndamento, concluidos };
-  }, [filteredApontamentos]);
-
-  const metricasTerritoriais: MetricasTerritoriais[] = useMemo(() => {
-    const territoriosAtivos =
-      filters.territorios.length > 0 ? filters.territorios : territorios.map((t) => t.nome);
-
-    return territoriosAtivos.map((territorio) => {
-      const apontamentosDoTerritorio = filteredApontamentos.filter((a) => a.territorio === territorio);
-      const total = apontamentosDoTerritorio.length;
-      const pendentes = apontamentosDoTerritorio.filter((a) => a.status === "Pendente").length;
-      const emAndamento = apontamentosDoTerritorio.filter((a) => a.status === "Em andamento").length;
-      const concluidos = apontamentosDoTerritorio.filter((a) => a.status === "Concluído").length;
-      const percentualConclusao = total > 0 ? (concluidos / total) * 100 : 0;
-
-      return {
-        territorio,
-        total,
-        pendentes,
-        emAndamento,
-        concluidos,
-        percentualConclusao,
-      };
-    });
-  }, [filteredApontamentos, filters.territorios, territorios]);
-
-  const statusDistribution = useMemo(() => {
-    return [
-      { status: "Pendente", count: metrics.pendentes },
-      { status: "Em andamento", count: metrics.emAndamento },
-      { status: "Concluído", count: metrics.concluidos },
-    ];
-  }, [metrics]);
+  }, [filters, apontamentos]);
 
   const clearAllFilters = () => {
     setFilters({
       territorios: [],
       status: [],
     });
-    setActiveMetric(null);
-  };
-
-  const handleMetricClick = (metric: string) => {
-    setActiveMetric(activeMetric === metric ? null : metric);
   };
 
   const hasActiveFilters =
@@ -176,7 +109,7 @@ const Apontamentos = () => {
                   Apontamentos
                 </h1>
                 <p className="text-sm text-muted-foreground mt-1.5">
-                  {metrics.total} {metrics.total === 1 ? 'apontamento' : 'apontamentos'}
+                  Acompanhamento de {filteredApontamentos.length} {filteredApontamentos.length === 1 ? 'ação' : 'ações'}
                 </p>
               </div>
               <Button
@@ -291,57 +224,12 @@ const Apontamentos = () => {
             {/* Main Content */}
             <main className={showFilters ? "lg:col-span-3" : "lg:col-span-4"}>
               <div className="space-y-6">
-                {/* KPI Cards */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                  <MetricCard
-                    title="Total"
-                    value={metrics.total}
-                    icon={FileText}
-                    variant="default"
-                    onClick={() => handleMetricClick('total')}
-                    isActive={activeMetric === 'total'}
-                  />
-                  <MetricCard
-                    title="Pendentes"
-                    value={metrics.pendentes}
-                    icon={Clock}
-                    variant="danger"
-                    onClick={() => handleMetricClick('pendentes')}
-                    isActive={activeMetric === 'pendentes'}
-                  />
-                  <MetricCard
-                    title="Em Andamento"
-                    value={metrics.emAndamento}
-                    icon={BarChart3}
-                    variant="warning"
-                    onClick={() => handleMetricClick('emAndamento')}
-                    isActive={activeMetric === 'emAndamento'}
-                  />
-                  <MetricCard
-                    title="Concluídos"
-                    value={metrics.concluidos}
-                    icon={CheckCircle2}
-                    variant="success"
-                    onClick={() => handleMetricClick('concluidos')}
-                    isActive={activeMetric === 'concluidos'}
-                  />
-                </div>
-
                 {/* Charts */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                  <StatusDistributionChart data={statusDistribution} />
-                  <TerritoryMetricsChart data={metricasTerritoriais} />
-                </div>
+                <ApontamentosChart apontamentos={filteredApontamentos} />
 
                 {/* Table */}
                 <div>
-                  <div className="mb-3 sm:mb-4">
-                    <h2 className="text-lg sm:text-xl font-semibold">Apontamentos Detalhados</h2>
-                    <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                      {filteredApontamentos.length} resultado(s) encontrado(s)
-                      {activeMetric && <span className="ml-2 text-primary font-medium">(Filtrado)</span>}
-                    </p>
-                  </div>
+                  <h2 className="text-lg font-semibold mb-3">Lista de Apontamentos</h2>
                   <ApontamentoTable apontamentos={filteredApontamentos} />
                 </div>
               </div>

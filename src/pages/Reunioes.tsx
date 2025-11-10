@@ -1,17 +1,20 @@
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { ReunioesTable } from "@/components/reunioes/ReunioesTable";
+import { ReunioesChart } from "@/components/reunioes/ReunioesChart";
 import { useReunioesData } from "@/hooks/useReunioesData";
-import { Calendar, Search, X, Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, Calendar, X, Filter } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 const Reunioes = () => {
   const { reunioes, loading, error } = useReunioesData();
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState("");
+  const [showFilters, setShowFilters] = useState(true);
 
   const filteredReunioes = useMemo(() => {
     return reunioes.filter((reuniao) => {
@@ -67,53 +70,92 @@ const Reunioes = () => {
                   Reuniões
                 </h1>
                 <p className="text-sm text-muted-foreground mt-1.5">
-                  {filteredReunioes.length} {filteredReunioes.length === 1 ? 'reunião' : 'reuniões'}
+                  Histórico e análise de {filteredReunioes.length} {filteredReunioes.length === 1 ? 'reunião' : 'reuniões'}
                 </p>
               </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowFilters(!showFilters)}
+                className="gap-2"
+              >
+                <Filter className="w-4 h-4" />
+                {showFilters ? "Ocultar" : "Mostrar"}
+              </Button>
             </div>
           </div>
         </header>
 
-        <div className="container mx-auto px-4 py-6 space-y-6">
-          {/* Filters */}
-          <Card className="p-5 shadow-md">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Buscar por território ou secretário..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <div className="flex gap-2">
-                <Input
-                  type="month"
-                  value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
-                  className="w-full sm:w-auto"
-                />
-                {(searchTerm || dateFilter) && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      setSearchTerm("");
-                      setDateFilter("");
-                    }}
-                    className="shrink-0"
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-          </Card>
+        {/* Main Content */}
+        <div className="container mx-auto px-4 py-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Filters Sidebar */}
+            {showFilters && (
+              <aside className="lg:col-span-1">
+                <Card className="p-5 shadow-md sticky top-24">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold flex items-center gap-2">
+                      <Filter className="w-5 h-5" />
+                      Filtros
+                    </h2>
+                    {(searchTerm || dateFilter) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSearchTerm("");
+                          setDateFilter("");
+                        }}
+                        className="h-7 text-xs gap-1"
+                      >
+                        <X className="w-3 h-3" />
+                        Limpar
+                      </Button>
+                    )}
+                  </div>
 
-          {/* Table */}
-          <ReunioesTable reunioes={filteredReunioes} />
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Buscar</label>
+                      <Input
+                        type="text"
+                        placeholder="Território ou secretário..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="text-sm"
+                      />
+                    </div>
+
+                    <Separator />
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Mês</label>
+                      <Input
+                        type="month"
+                        value={dateFilter}
+                        onChange={(e) => setDateFilter(e.target.value)}
+                        className="text-sm"
+                      />
+                    </div>
+                  </div>
+                </Card>
+              </aside>
+            )}
+
+            {/* Main Content */}
+            <main className={showFilters ? "lg:col-span-3" : "lg:col-span-4"}>
+              <div className="space-y-6">
+                {/* Charts */}
+                <ReunioesChart reunioes={filteredReunioes} />
+
+                {/* Table */}
+                <div>
+                  <h2 className="text-lg font-semibold mb-3">Lista de Reuniões</h2>
+                  <ReunioesTable reunioes={filteredReunioes} />
+                </div>
+              </div>
+            </main>
+          </div>
         </div>
       </div>
     </AppLayout>

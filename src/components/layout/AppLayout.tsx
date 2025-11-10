@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Eye, LayoutDashboard, Calendar, FileText, ListChecks, Menu } from "lucide-react";
+import { Calendar, FileText, ListChecks, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -11,34 +11,22 @@ interface AppLayoutProps {
 
 const navigationItems = [
   {
-    label: "Visão Geral",
-    href: "/",
-    icon: Eye,
-    description: "Visualização hierárquica",
-  },
-  {
-    label: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-    description: "Métricas e análises",
-  },
-  {
     label: "Reuniões",
-    href: "/reunioes",
+    href: "/",
     icon: Calendar,
-    description: "Histórico de reuniões",
+    description: "Histórico e análise de reuniões",
   },
   {
     label: "Pautas",
     href: "/pautas",
     icon: FileText,
-    description: "Pautas discutidas",
+    description: "Pautas e discussões",
   },
   {
     label: "Apontamentos",
     href: "/apontamentos",
     icon: ListChecks,
-    description: "Ações e status",
+    description: "Ações e acompanhamento",
   },
 ];
 
@@ -47,15 +35,15 @@ const SidebarContent = () => {
 
   return (
     <>
-      <div className="p-6 border-b border-sidebar-border bg-sidebar">
-        <h1 className="text-xl font-bold text-sidebar-foreground">
+      <div className="p-6 border-b border-border bg-card">
+        <h1 className="text-xl font-bold text-foreground">
           Gestão Territorial
         </h1>
-        <p className="text-xs text-sidebar-foreground/70 mt-1">
+        <p className="text-xs text-muted-foreground mt-1">
           Sistema de gerenciamento
         </p>
       </div>
-      <nav className="flex-1 p-4 bg-sidebar">
+      <nav className="flex-1 p-4 bg-card">
         <div className="space-y-1">
           {navigationItems.map((item) => {
             const Icon = item.icon;
@@ -67,8 +55,8 @@ const SidebarContent = () => {
                 className={cn(
                   "flex items-start gap-3 px-4 py-3 rounded-lg transition-smooth group",
                   isActive
-                    ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-glow"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-foreground hover:bg-muted"
                 )}
               >
                 <Icon className="w-5 h-5 mt-0.5 shrink-0" />
@@ -77,8 +65,8 @@ const SidebarContent = () => {
                   <span className={cn(
                     "text-xs mt-0.5",
                     isActive 
-                      ? "text-sidebar-primary-foreground/80" 
-                      : "text-sidebar-foreground/60 group-hover:text-sidebar-accent-foreground/80"
+                      ? "text-primary-foreground/90" 
+                      : "text-muted-foreground group-hover:text-foreground"
                   )}>
                     {item.description}
                   </span>
@@ -98,7 +86,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex md:w-72 bg-sidebar border-r border-sidebar-border flex-col fixed h-full z-20">
+      <aside className="hidden md:flex md:w-72 bg-card border-r border-border flex-col fixed h-full z-20">
         <SidebarContent />
       </aside>
 
