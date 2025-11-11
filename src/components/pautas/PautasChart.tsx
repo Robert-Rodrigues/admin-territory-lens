@@ -53,16 +53,16 @@ export const PautasChart = ({ pautas }: PautasChartProps) => {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Line Chart - Trends over time */}
       <Card>
-        <CardHeader>
+        <CardHeader className="pb-3">
           <CardTitle className="text-base">Evolução de Pautas</CardTitle>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={monthlyData}>
+        <CardContent className="pt-0">
+          <ResponsiveContainer width="100%" height={350}>
+            <LineChart data={monthlyData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis 
                 dataKey="month" 
-                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
               />
               <YAxis tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
               <Tooltip 
@@ -72,13 +72,15 @@ export const PautasChart = ({ pautas }: PautasChartProps) => {
                   borderRadius: '8px',
                 }}
               />
-              <Legend />
+              <Legend wrapperStyle={{ fontSize: '12px' }} />
               <Line 
                 type="monotone" 
                 dataKey="total" 
                 stroke="hsl(var(--primary))" 
                 strokeWidth={2}
                 name="Total de Pautas"
+                dot={{ r: 4 }}
+                activeDot={{ r: 6 }}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -87,16 +89,16 @@ export const PautasChart = ({ pautas }: PautasChartProps) => {
 
       {/* Area Chart - Status distribution */}
       <Card>
-        <CardHeader>
+        <CardHeader className="pb-3">
           <CardTitle className="text-base">Status das Ações</CardTitle>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={monthlyData}>
+        <CardContent className="pt-0">
+          <ResponsiveContainer width="100%" height={350}>
+            <AreaChart data={monthlyData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis 
                 dataKey="month" 
-                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
               />
               <YAxis tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
               <Tooltip 
@@ -106,7 +108,7 @@ export const PautasChart = ({ pautas }: PautasChartProps) => {
                   borderRadius: '8px',
                 }}
               />
-              <Legend />
+              <Legend wrapperStyle={{ fontSize: '12px' }} />
               <Area 
                 type="monotone" 
                 dataKey="concluidas" 

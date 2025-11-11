@@ -37,19 +37,20 @@ export const ReunioesChart = ({ reunioes }: ReunioesChartProps) => {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Bar Chart - Meetings by Territory */}
       <Card>
-        <CardHeader>
+        <CardHeader className="pb-3">
           <CardTitle className="text-base">Reuniões por Território</CardTitle>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={topTerritorios}>
+        <CardContent className="pt-0">
+          <ResponsiveContainer width="100%" height={350}>
+            <BarChart data={topTerritorios} margin={{ top: 5, right: 10, left: 0, bottom: 60 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis 
                 dataKey="territorio" 
-                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
                 angle={-45}
                 textAnchor="end"
-                height={80}
+                height={100}
+                interval={0}
               />
               <YAxis tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
               <Tooltip 
@@ -59,7 +60,7 @@ export const ReunioesChart = ({ reunioes }: ReunioesChartProps) => {
                   borderRadius: '8px',
                 }}
               />
-              <Bar dataKey="total" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
+              <Bar dataKey="total" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} name="Reuniões" />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
@@ -67,11 +68,11 @@ export const ReunioesChart = ({ reunioes }: ReunioesChartProps) => {
 
       {/* Pie Chart - Distribution */}
       <Card>
-        <CardHeader>
+        <CardHeader className="pb-3">
           <CardTitle className="text-base">Distribuição de Reuniões</CardTitle>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
+        <CardContent className="pt-0">
+          <ResponsiveContainer width="100%" height={350}>
             <PieChart>
               <Pie
                 data={topTerritorios}
@@ -79,9 +80,8 @@ export const ReunioesChart = ({ reunioes }: ReunioesChartProps) => {
                 nameKey="territorio"
                 cx="50%"
                 cy="50%"
-                outerRadius={100}
-                label={(entry) => `${entry.territorio}: ${entry.total}`}
-                labelLine={{ stroke: 'hsl(var(--border))' }}
+                outerRadius={90}
+                label={false}
               >
                 {topTerritorios.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -93,6 +93,12 @@ export const ReunioesChart = ({ reunioes }: ReunioesChartProps) => {
                   border: '1px solid hsl(var(--border))',
                   borderRadius: '8px',
                 }}
+              />
+              <Legend 
+                verticalAlign="bottom" 
+                height={36}
+                wrapperStyle={{ fontSize: '12px' }}
+                formatter={(value, entry: any) => `${value} (${entry.payload.total})`}
               />
             </PieChart>
           </ResponsiveContainer>

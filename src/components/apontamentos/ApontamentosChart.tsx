@@ -46,11 +46,11 @@ export const ApontamentosChart = ({ apontamentos }: ApontamentosChartProps) => {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Pie Chart - Overall Status */}
       <Card>
-        <CardHeader>
+        <CardHeader className="pb-3">
           <CardTitle className="text-base">Status Geral dos Apontamentos</CardTitle>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
+        <CardContent className="pt-0">
+          <ResponsiveContainer width="100%" height={350}>
             <PieChart>
               <Pie
                 data={statusData}
@@ -58,9 +58,8 @@ export const ApontamentosChart = ({ apontamentos }: ApontamentosChartProps) => {
                 nameKey="status"
                 cx="50%"
                 cy="50%"
-                outerRadius={100}
-                label={(entry) => `${entry.status}: ${entry.count}`}
-                labelLine={{ stroke: 'hsl(var(--border))' }}
+                outerRadius={90}
+                label={false}
               >
                 {statusData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={STATUS_COLORS[entry.status as keyof typeof STATUS_COLORS]} />
@@ -73,6 +72,12 @@ export const ApontamentosChart = ({ apontamentos }: ApontamentosChartProps) => {
                   borderRadius: '8px',
                 }}
               />
+              <Legend 
+                verticalAlign="bottom" 
+                height={36}
+                wrapperStyle={{ fontSize: '12px' }}
+                formatter={(value, entry: any) => `${value} (${entry.payload.count})`}
+              />
             </PieChart>
           </ResponsiveContainer>
         </CardContent>
@@ -80,19 +85,20 @@ export const ApontamentosChart = ({ apontamentos }: ApontamentosChartProps) => {
 
       {/* Stacked Bar - Territory Status */}
       <Card>
-        <CardHeader>
+        <CardHeader className="pb-3">
           <CardTitle className="text-base">Status por Território</CardTitle>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={territorioData}>
+        <CardContent className="pt-0">
+          <ResponsiveContainer width="100%" height={350}>
+            <BarChart data={territorioData} margin={{ top: 5, right: 10, left: 0, bottom: 60 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis 
                 dataKey="territorio" 
-                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
                 angle={-45}
                 textAnchor="end"
-                height={80}
+                height={100}
+                interval={0}
               />
               <YAxis tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
               <Tooltip 
@@ -102,8 +108,8 @@ export const ApontamentosChart = ({ apontamentos }: ApontamentosChartProps) => {
                   borderRadius: '8px',
                 }}
               />
-              <Legend />
-              <Bar dataKey="concluidos" stackId="a" fill="hsl(var(--success))" name="Concluídos" />
+              <Legend wrapperStyle={{ fontSize: '12px' }} />
+              <Bar dataKey="concluidos" stackId="a" fill="hsl(var(--success))" name="Concluídos" radius={[8, 8, 0, 0]} />
               <Bar dataKey="emAndamento" stackId="a" fill="hsl(var(--warning))" name="Em Andamento" />
               <Bar dataKey="pendentes" stackId="a" fill="hsl(var(--danger))" name="Pendentes" />
             </BarChart>

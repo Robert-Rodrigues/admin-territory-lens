@@ -91,8 +91,8 @@ const Reunioes = () => {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Filters Sidebar */}
             {showFilters && (
-              <aside className="lg:col-span-1">
-                <Card className="p-5 shadow-md sticky top-24">
+              <aside className="lg:col-span-1 space-y-4">
+                <Card className="p-4 shadow-md sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-semibold flex items-center gap-2">
                       <Filter className="w-5 h-5" />
