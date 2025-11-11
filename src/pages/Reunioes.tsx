@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { ReunioesTable } from "@/components/reunioes/ReunioesTable";
 import { ReunioesChart } from "@/components/reunioes/ReunioesChart";
 import { useReunioesData } from "@/hooks/useReunioesData";
+import { TerritoryFilter } from "@/components/dashboard/TerritoryFilter";
 import { Loader2, AlertCircle, Calendar, X, Filter } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -12,24 +13,55 @@ import { Separator } from "@/components/ui/separator";
 
 const Reunioes = () => {
   const { reunioes, loading, error } = useReunioesData();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [dateFilter, setDateFilter] = useState("");
   const [showFilters, setShowFilters] = useState(true);
+  const [filters, setFilters] = useState({
+    territorios: [] as string[],
+    dataInicio: "",
+    dataFim: "",
+    secretario: "",
+  });
+
+  // Extract unique territories
+  const territorios = useMemo(() => {
+    const uniqueNames = Array.from(new Set(reunioes.map((r) => r.territorio))).sort();
+    return uniqueNames.map((nome, index) => ({ id: index.toString(), nome }));
+  }, [reunioes]);
 
   const filteredReunioes = useMemo(() => {
     return reunioes.filter((reuniao) => {
-      const matchesSearch =
-        searchTerm === "" ||
-        reuniao.territorio.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        reuniao.secretario.toLowerCase().includes(searchTerm.toLowerCase());
-
-      const matchesDate =
-        dateFilter === "" ||
-        reuniao.data.startsWith(dateFilter);
-
-      return matchesSearch && matchesDate;
+      if (filters.territorios.length > 0 && !filters.territorios.includes(reuniao.territorio)) {
+        return false;
+      }
+      if (filters.dataInicio && new Date(reuniao.data) < new Date(filters.dataInicio)) {
+        return false;
+      }
+      if (filters.dataFim && new Date(reuniao.data) > new Date(filters.dataFim)) {
+        return false;
+      }
+      if (
+        filters.secretario &&
+        !reuniao.secretario.toLowerCase().includes(filters.secretario.toLowerCase())
+      ) {
+        return false;
+      }
+      return true;
     });
-  }, [reunioes, searchTerm, dateFilter]);
+  }, [reunioes, filters]);
+
+  const clearAllFilters = () => {
+    setFilters({
+      territorios: [],
+      dataInicio: "",
+      dataFim: "",
+      secretario: "",
+    });
+  };
+
+  const hasActiveFilters =
+    filters.territorios.length > 0 ||
+    filters.dataInicio ||
+    filters.dataFim ||
+    filters.secretario;
 
   if (loading) {
     return (
@@ -98,14 +130,11 @@ const Reunioes = () => {
                       <Filter className="w-5 h-5" />
                       Filtros
                     </h2>
-                    {(searchTerm || dateFilter) && (
+                    {hasActiveFilters && (
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => {
-                          setSearchTerm("");
-                          setDateFilter("");
-                        }}
+                        onClick={clearAllFilters}
                         className="h-7 text-xs gap-1"
                       >
                         <X className="w-3 h-3" />
@@ -114,26 +143,48 @@ const Reunioes = () => {
                     )}
                   </div>
 
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Buscar</label>
-                      <Input
-                        type="text"
-                        placeholder="Território ou secretário..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="text-sm"
-                      />
+                  <div className="space-y-6">
+                    <TerritoryFilter
+                      territorios={territorios}
+                      selectedTerritorios={filters.territorios}
+                      onTerritoriosChange={(territorios) =>
+                        setFilters({ ...filters, territorios })
+                      }
+                    />
+
+                    <Separator />
+
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium text-foreground">Período</label>
+                      <div className="space-y-2">
+                        <Input
+                          type="date"
+                          value={filters.dataInicio}
+                          onChange={(e) =>
+                            setFilters({ ...filters, dataInicio: e.target.value })
+                          }
+                          className="text-sm"
+                        />
+                        <Input
+                          type="date"
+                          value={filters.dataFim}
+                          onChange={(e) => setFilters({ ...filters, dataFim: e.target.value })}
+                          className="text-sm"
+                        />
+                      </div>
                     </div>
 
                     <Separator />
 
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Mês</label>
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium text-foreground">Secretário</label>
                       <Input
-                        type="month"
-                        value={dateFilter}
-                        onChange={(e) => setDateFilter(e.target.value)}
+                        type="text"
+                        placeholder="Nome do secretário..."
+                        value={filters.secretario}
+                        onChange={(e) =>
+                          setFilters({ ...filters, secretario: e.target.value })
+                        }
                         className="text-sm"
                       />
                     </div>

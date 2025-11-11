@@ -5,31 +5,78 @@ import { Card } from "@/components/ui/card";
 import { PautasTable } from "@/components/pautas/PautasTable";
 import { PautasChart } from "@/components/pautas/PautasChart";
 import { usePautasData } from "@/hooks/usePautasData";
+import { TerritoryFilter } from "@/components/dashboard/TerritoryFilter";
 import { Loader2, AlertCircle, FileText, X, Filter } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const Pautas = () => {
   const { pautas, loading, error } = usePautasData();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [dateFilter, setDateFilter] = useState("");
   const [showFilters, setShowFilters] = useState(true);
+  const [filters, setFilters] = useState({
+    territorios: [] as string[],
+    dataInicio: "",
+    dataFim: "",
+    descricao: "",
+    statusAcoes: "",
+  });
+
+  // Extract unique territories
+  const territorios = useMemo(() => {
+    const uniqueNames = Array.from(new Set(pautas.map((p) => p.territorio))).sort();
+    return uniqueNames.map((nome, index) => ({ id: index.toString(), nome }));
+  }, [pautas]);
 
   const filteredPautas = useMemo(() => {
     return pautas.filter((pauta) => {
-      const matchesSearch =
-        searchTerm === "" ||
-        pauta.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        pauta.territorio.toLowerCase().includes(searchTerm.toLowerCase());
-
-      const matchesDate =
-        dateFilter === "" ||
-        pauta.dataReuniao.startsWith(dateFilter);
-
-      return matchesSearch && matchesDate;
+      if (filters.territorios.length > 0 && !filters.territorios.includes(pauta.territorio)) {
+        return false;
+      }
+      if (filters.dataInicio && new Date(pauta.dataReuniao) < new Date(filters.dataInicio)) {
+        return false;
+      }
+      if (filters.dataFim && new Date(pauta.dataReuniao) > new Date(filters.dataFim)) {
+        return false;
+      }
+      if (
+        filters.descricao &&
+        !pauta.descricao.toLowerCase().includes(filters.descricao.toLowerCase())
+      ) {
+        return false;
+      }
+      if (filters.statusAcoes) {
+        if (filters.statusAcoes === "pendente" && pauta.acoesPendentes === 0) return false;
+        if (filters.statusAcoes === "andamento" && pauta.acoesEmAndamento === 0) return false;
+        if (filters.statusAcoes === "concluido" && pauta.acoesConcluidas === 0) return false;
+      }
+      return true;
     });
-  }, [pautas, searchTerm, dateFilter]);
+  }, [pautas, filters]);
+
+  const clearAllFilters = () => {
+    setFilters({
+      territorios: [],
+      dataInicio: "",
+      dataFim: "",
+      descricao: "",
+      statusAcoes: "",
+    });
+  };
+
+  const hasActiveFilters =
+    filters.territorios.length > 0 ||
+    filters.dataInicio ||
+    filters.dataFim ||
+    filters.descricao ||
+    filters.statusAcoes;
 
   if (loading) {
     return (
@@ -98,14 +145,11 @@ const Pautas = () => {
                       <Filter className="w-5 h-5" />
                       Filtros
                     </h2>
-                    {(searchTerm || dateFilter) && (
+                    {hasActiveFilters && (
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => {
-                          setSearchTerm("");
-                          setDateFilter("");
-                        }}
+                        onClick={clearAllFilters}
                         className="h-7 text-xs gap-1"
                       >
                         <X className="w-3 h-3" />
@@ -114,26 +158,70 @@ const Pautas = () => {
                     )}
                   </div>
 
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Buscar</label>
-                      <Input
-                        type="text"
-                        placeholder="Descrição ou território..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="text-sm"
-                      />
+                  <div className="space-y-6">
+                    <TerritoryFilter
+                      territorios={territorios}
+                      selectedTerritorios={filters.territorios}
+                      onTerritoriosChange={(territorios) =>
+                        setFilters({ ...filters, territorios })
+                      }
+                    />
+
+                    <Separator />
+
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium text-foreground">Período</label>
+                      <div className="space-y-2">
+                        <Input
+                          type="date"
+                          value={filters.dataInicio}
+                          onChange={(e) =>
+                            setFilters({ ...filters, dataInicio: e.target.value })
+                          }
+                          className="text-sm"
+                        />
+                        <Input
+                          type="date"
+                          value={filters.dataFim}
+                          onChange={(e) => setFilters({ ...filters, dataFim: e.target.value })}
+                          className="text-sm"
+                        />
+                      </div>
                     </div>
 
                     <Separator />
 
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Mês da Reunião</label>
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium text-foreground">Status das Ações</label>
+                      <Select
+                        value={filters.statusAcoes}
+                        onValueChange={(value) =>
+                          setFilters({ ...filters, statusAcoes: value })
+                        }
+                      >
+                        <SelectTrigger className="text-sm">
+                          <SelectValue placeholder="Todos os status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todos os status</SelectItem>
+                          <SelectItem value="pendente">Com pendentes</SelectItem>
+                          <SelectItem value="andamento">Em andamento</SelectItem>
+                          <SelectItem value="concluido">Concluídas</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <Separator />
+
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium text-foreground">Descrição</label>
                       <Input
-                        type="month"
-                        value={dateFilter}
-                        onChange={(e) => setDateFilter(e.target.value)}
+                        type="text"
+                        placeholder="Buscar na descrição..."
+                        value={filters.descricao}
+                        onChange={(e) =>
+                          setFilters({ ...filters, descricao: e.target.value })
+                        }
                         className="text-sm"
                       />
                     </div>
