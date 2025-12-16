@@ -4,6 +4,7 @@ import { useGlobalFilters } from "@/contexts/GlobalFiltersContext";
 import { Card } from "@/components/ui/card";
 import { PautasTable } from "@/components/pautas/PautasTable";
 import { PautasChart } from "@/components/pautas/PautasChart";
+import { TopPautasList } from "@/components/pautas/TopPautasList";
 import { usePautasData } from "@/hooks/usePautasData";
 import { Loader2, AlertCircle, FileText } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -107,6 +108,9 @@ const Pautas = () => {
           <div className="space-y-4 md:space-y-6">
             {/* Charts */}
             <PautasChart pautas={filteredPautas} />
+
+            {/* Top 10 Pautas */}
+            <TopPautasList pautas={filteredPautas} />
 
             {/* Table Section */}
             <div className="space-y-3">
