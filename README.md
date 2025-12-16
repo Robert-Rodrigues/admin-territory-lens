@@ -1,5 +1,5 @@
 # Welcome to your Lovable project
-link https://hello-hearts-connect.lovable.app
+link https://admin-territory-lens.lovable.app
 ## Project info
 
 **URL**: https://lovable.dev/projects/89a9d31a-f3ba-4cce-9e75-3dc7683018b3
